@@ -39,63 +39,64 @@ class Events(BaseAPI):
             eventData = await self.get(self.endpoint, params=params)
             for event in eventData:
                 self._last_seen_id = event["id"]
-                print(event)
                 eventType = event["type"]
                 data = Object(event["data"])
                 data = Object({"time": event["time"], "data": data})
-                
+
                 #fire any events that occured
                 if eventType == "ConfigSaved":
-                    await self.events.onConfigSaved(data)
+                    self.Events.onConfigSaved(data)
                 elif eventType == "DeviceConnected":
-                    await self.events.onDeviceConnected(data)
+                    self.Events.onDeviceConnected(data)
                 elif eventType == "DeviceDisconnected":
-                    await self.events.onDeviceDisconnected(data)
+                    self.Events.onDeviceDisconnected(data)
                 elif eventType == "DeviceDiscovered":
-                    await self.events.onDeviceDiscovered(data)
+                    self.Events.onDeviceDiscovered(data)
                 elif eventType == "DevicePaused":
-                    await self.events.onDevicePaused(data)
+                    self.Events.onDevicePaused(data)
                 elif eventType == "DeviceResumed":
-                    await self.events.onDeviceResumed(data)
+                    self.Events.onDeviceResumed(data)
                 elif eventType == "DeviceRejected":
-                    await self.events.onDeviceRejected(data)
+                    self.Events.onDeviceRejected(data)
                 elif eventType == "DownloadProgress":
-                    await self.events.onDownloadProgress(data)
+                    self.Events.onDownloadProgress(data)
                 elif eventType == "FolderCompletion":
-                    await self.events.onFolderCompletetion(data)
+                    self.Events.onFolderCompletion(data)
                 elif eventType == "FolderErrors":
-                    await self.events.onFolderErrors(data)
+                    self.Events.onFolderErrors(data)
                 elif eventType == "FolderRejected":
-                    await self.events.onFolderRejected(data)
+                    self.Events.onFolderRejected(data)
                 elif eventType == "FolderScanProgress":
-                    await self.events.onFolderScanProgress(data)
+                    self.Events.onFolderScanProgress(data)
                 elif eventType == "FolderSummary":
-                    await self.events.onFolderSummary(data)
+                    self.Events.onFolderSummary(data)
                 elif eventType == "ItemFinished":
-                    await self.events.onItemFinished(data)
+                    self.Events.onItemFinished(data)
                 elif eventType == "itemStarted":
-                    await self.events.onItemStarted(data)
+                    self.Events.onItemStarted(data)
                 elif eventType == "ListenAddressesChanged":
-                    await self.events.onListenAddressesChanged(data)
+                    self.Events.onListenAddressesChanged(data)
                 elif eventType == "LocalChangeDetected":
-                    await self.events.onLocalChangeDetected(data)
+                    self.Events.onLocalChangeDetected(data)
                 elif eventType == "LocalIndexUpdated":
-                    await self.events.onLocalIndexUpdated(data)
+                    self.Events.onLocalIndexUpdated(data)
                 elif eventType == "LoginAttempt":
-                    await self.events.onLoginAttempt(data)
+                    self.Events.onLoginAttempt(data)
                 elif eventType == "RemoteChangeDetected":
-                    await self.events.onRemoteChangeDetected(data)
+                    self.Events.onRemoteChangeDetected(data)
                 elif eventType == "RemoteDownloadProgress":
-                    await self.events.onRemoteDownloadProgress(data)
+                    self.Events.onRemoteDownloadProgress(data)
                 elif eventType == "RemoteIndexUpdated":
-                    await self.events.onRemoteIndexUpdated(data)
+                    self.Events.onRemoteIndexUpdated(data)
                 elif eventType == "Starting":
-                    await self.events.onStarting(data)
+                    self.Events.onStarting(data)
                 elif eventType == "StartupComplete":
-                    await self.events.onStartupComplete(data)
+                    self.Events.onStartupComplete(data)
                 elif eventType == "StateChanged":
-                    await self.events.onStateChanged(data)
-                
+                    self.Events.onStateChanged(data)
+                    continue
+
+                print(event)
 
 
 class _Events(object):
@@ -122,6 +123,7 @@ class _Events(object):
         self.onLoginAttempt = EventHook()
         self.onRemoteChangeDetected = EventHook()
         self.onRemoteDownloadProgress = EventHook()
+        self.onRemoteIndexUpdated = EventHook()
         self.onStarting = EventHook()
         self.onStartupComplete = EventHook()
         self.onStateChanged = EventHook()
