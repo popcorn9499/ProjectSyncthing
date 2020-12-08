@@ -96,8 +96,6 @@ class Events(BaseAPI):
                     self.Events.onStateChanged(data)
                     continue
 
-                print(event)
-
 
 class _Events(object):
     def __init__(self):
