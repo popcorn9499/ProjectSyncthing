@@ -163,7 +163,7 @@ class main:
                 if extractable and not alreadyDone:#if its a supported archive attempt to unrar
                     archiveContents = await archiveHandler.archiveHandler.listArchive(extractionDir+os.sep+item)
                     await archiveHandler.archiveHandler.extractArchive(item,extractionDir)
-                    if len(archiveContents) > 0:
+                    if len(archiveContents) > 0: #prevents us from saying we extracted a empty archive.
                         print("Extracted " + item)
                         await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
                         break #leave loop once we found the good archive to extract
