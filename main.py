@@ -115,7 +115,7 @@ class main:
         newItem = (os.sep).join(items)
         newSrc = src + newItem
         newDst = dst + newItem
-        try:
+        try: #create the sym link
             print("dst: {0}, src: {1}".format(newDst,newSrc))
             os.symlink(newSrc,newDst)
         except FileExistsError as e:
@@ -165,7 +165,7 @@ class main:
     async def _checkDeadSymlink(self,path):
         if os.path.islink(path) and not os.path.exists(path):
            print("Dead Link: " + path)
-           #os.unlink(path)
+           os.unlink(path)
 
 
 main1 = main()
