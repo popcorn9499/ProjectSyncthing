@@ -68,11 +68,12 @@ class main:
                 itemInputFolder = self.inputDir + os.sep + item.itemName
                 if not os.path.exists(itemInputFolder): #exit iteration if the file does not exist
                     continue
+                
                 if item.action == QI_Actions.UPDATE.value:
-                    # if item.itemType == QI_ItemType.FILE.value:
-                    #     await self.attemptExtraction(itemInputFolder)
-                    # elif item.itemType == QI_ItemType.DIR.value:
-                    #     pass
+                    if item.itemType == QI_ItemType.FILE.value:
+                        await self.attemptExtraction(itemInputFolder)
+                    elif item.itemType == QI_ItemType.DIR.value:
+                        pass
                     await self._makeSymLink(self.inputDir,self.outputDir,item.itemName,self.directoryDepth)
                 elif item.action == QI_Actions.DELETE.value:
                     #empty all symbolic links.
