@@ -50,6 +50,7 @@ class main:
             print(str(data))
             self.counter += 1
             print("Counter: " + str(self.counter))
+            await asyncio.sleep(5)
             while not self.processingQueueTask.done():
                 await asyncio.sleep(10) #this is not a mission critical task and should be done slowly.
             self.processingQueueTask = asyncio.create_task(self._processQueue(data.data.folder))
