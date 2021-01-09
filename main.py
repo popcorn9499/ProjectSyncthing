@@ -109,7 +109,6 @@ class main:
                             os.removedirs(itemOutputFolder) 
             except Exception as e:
                 print("Error " + str(e))
-                pass
             print("Next")
             self.queue.remove(item)#remove the item from the list/queue
         print("DONE")
@@ -147,15 +146,16 @@ class main:
         date= datetime(year,month,day,hour=hour,minute=minute,second=second)
         return date
 
+    #find the directory of a file/or if its a directory and return the directory path
     async def _findFileDirectory(self,item):
         directory = item
-        if (os.path.isfile(item)):
+        if (os.path.isfile(item)): #if its a file determine the files parent directory
             print("Find File Directory LOOKING " + item)
             lastSlash = item.rfind(os.sep)
             directory = item[:lastSlash]
-        print("Find File Directory Result " + directory)
         return directory
 
+    #extract any items in the parent directory
     async def attemptExtraction(self,extractItem):
         extractionDir = await self._findFileDirectory(extractItem)
         for item in os.listdir(extractionDir):
@@ -195,6 +195,7 @@ class main:
         f.write(json.dumps(config,sort_keys=True, indent=4 ) + "\n") #writes the string to a file
         f.close() #closes the file io
 
+    #create a symlink to the output directory from the input directory
     async def _makeSymLink(self,src,dst,item,depth):
         items = item.split(os.sep)
         items = items[0:depth]
