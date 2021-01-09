@@ -44,6 +44,12 @@ class main:
             item = QueueItem(itemName,itemType,folderID,action)
             self.queue.append(item)
 
+    #the purpose of this function is to handle all the cleaning that may be required due to strange shutdowns
+    async def startingCleaning(self):
+        pass
+        #clean any dead links
+        #create any links and extracted files that may be required. 
+        #walk through folder
 
     async def main(self, data):
         isIdle = data.data.summary["state"] == "idle"
@@ -176,8 +182,9 @@ class main:
                     archiveContents = await archiveHandler.archiveHandler.listArchive(extractionDir+os.sep+item)
                     print("EXTRACTING")
                     await archiveHandler.archiveHandler.extractArchive(item,extractionDir)
-                    await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
-                    break #leave loop once we found the good archive to extract
+                    if len(archiveContents) > 0:
+                        await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
+                        break #leave loop once we found the good archive to extract
             except:
                 pass
 
