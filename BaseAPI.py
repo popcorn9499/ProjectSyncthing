@@ -7,8 +7,8 @@ class BaseAPI:
     _baseURL=""
     
     def __init__(self,apiKey, host="localhost",port=8384):
-        self._headers = {'X-API-Key': apiKey}
-        self._baseURL = "http://{host}:{port}/{endpoint}".format(host=host,port=port,endpoint="{endpoint}")
+        self._headers = {'X-API-key': apiKey}
+        self._baseURL = "http://{host}:{port}{endpoint}".format(host=host,port=port,endpoint="{endpoint}")
 
     async def post(self,endpoint,params=[]):
         async with aiohttp.ClientSession() as session:
