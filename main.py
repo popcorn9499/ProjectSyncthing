@@ -99,6 +99,12 @@ class main:
             await archiveHandler.archiveHandler.extractArchive(extractItem,extractionDir)
             await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
 
+    async def fileLoad(self,fileName):#loads files
+        with open(fileName, 'r') as handle:#loads the json file
+            config = json.load(handle) 
+        return config
+
+
     async def fileSave(self,fileName,config):
         print("Saving")
         f = open(fileName, 'w') #opens the file your saving to with write permissions
