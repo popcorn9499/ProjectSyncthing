@@ -104,12 +104,20 @@ class main:
 
     async def attemptExtraction(self,extractItem):
         extractionDir = await self._findFileDirectory(extractItem)
-        alreadyDone = os.path.exists(extractionDir+os.sep+"filesExtracted.json")
-        extractable = await archiveHandler.archiveHandler.isSupportedArchive(extractItem)
-        if extractable and not alreadyDone:#if its a supported archive attempt to unrar
-            archiveContents = await archiveHandler.archiveHandler.listArchive(extractItem)
-            await archiveHandler.archiveHandler.extractArchive(extractItem,extractionDir)
-            await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
+        for item in os.listdir(extractionDir):
+            alreadyDone = os.path.exists(extractionDir+os.sep+"filesExtracted.json")
+            extractable = await archiveHandler.archiveHandler.isSupportedArchive(item)
+            try:
+                if extractable and not alreadyDone:#if its a supported archive attempt to unrar
+                    print("LISTING ARCHIVE")
+                    print(item)
+                    archiveContents = await archiveHandler.archiveHandler.listArchive(extractionDir+os.sep+item)
+                    print("EXTRACTING")
+                    await archiveHandler.archiveHandler.extractArchive(item,extractionDir)
+                    await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
+                    break #leave loop once we found the good archive to extract
+            except:
+                pass
 
     async def extractDeletion(self,extractItem):
         extractionDir = await self._findFileDirectory(extractItem)
