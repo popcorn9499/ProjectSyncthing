@@ -50,43 +50,77 @@ class main:
         noNeededFiles = data.data.summary["needFiles"]==0
         noNeededDirs = data.data.summary["needDirectories"]==0
         noNeededBytes = data.data.summary["needBytes"]==0
-        if await self.isFolder(data.data.folder) and isIdle and noNeededFiles and noNeededFiles and noNeededDirs and noNeededBytes:
+        print("FIRING QueueSize "+ str(len(self.queue)))
+        if (await self.isFolder(data.data.folder)):
             print(str(data))
-            self.counter += 1
+        print(await self.isFolder(data.data.folder))
+        print("IDLE {0}".format(isIdle))
+        print("noNeededFiles {0}".format(noNeededFiles))
+        print("noNeededDirs {0}".format(noNeededDirs))
+        print("noNeededBytes {0}".format(noNeededBytes))
+        
+        if await self.isFolder(data.data.folder) and isIdle and noNeededFiles and noNeededFiles and noNeededDirs and noNeededBytes:
+            #print(str(data))
+            
             print("Counter: " + str(self.counter))
             await asyncio.sleep(5)
             while not self.processingQueueTask.done():
-                await asyncio.sleep(10) #this is not a mission critical task and should be done slowly.
-            self.processingQueueTask = asyncio.create_task(self._processQueue(data.data.folder))
+                await asyncio.sleep(4) #this is not a mission critical task and should be done slowly.
+                print("LOOPPPPINGGG")
+            self.counter += 1
+            print("Counter: " + str(self.counter))
+            while len(self.queue) > 0:
+                self.processingQueueTask = asyncio.create_task(self._processQueue(data.data.folder))
+                await self.processingQueueTask
+                print("Queue Size to 0")
+                print("Current QueueSize" + str(len(self.queue)))
+            self.counter -= 1
+            print("Counter: " + str(self.counter))
             # self._symLinkFolder(self.inputDir,self.outputDir)
             # self._checkDeadSymlink(self.outputDir)
+        print("QueueSize "+ str(len(self.queue)))
 
     async def _processQueue(self,folderID):
         for item in self.queue:
-            if item.folderID == folderID:
-                #determine if its a folder or path.
-                    # if folder then create a symlink to it and unrar any files in that directory.
-                        #problem. how to handle deleting unrared items..
-                    # if file attempt to determine if its in the base directory or a subdirection
-                        #if its a file in the base directory then symlink the file.
-                itemOutputFolder = self.outputDir + os.sep + item.itemName
-                itemInputFolder = self.inputDir + os.sep + item.itemName
-                if not os.path.exists(itemInputFolder): #exit iteration if the file does not exist
-                    continue
-                
-                if item.action == QI_Actions.UPDATE.value:
-                    if item.itemType == QI_ItemType.FILE.value:
+            
+            try:
+                if item.folderID == folderID:
+                    await self.syncingCheck(item.folderID)
+                    #determine if its a folder or path.
+                        # if folder then create a symlink to it and unrar any files in that directory.
+                            #problem. how to handle deleting unrared items..
+                        # if file attempt to determine if its in the base directory or a subdirection
+                            #if its a file in the base directory then symlink the file.                    
+                    itemOutputFolder = self.outputDir + os.sep + item.itemName
+                    itemInputFolder = self.inputDir + os.sep + item.itemName
+                    print("Processing " + item.itemName)
+                    
+                    if item.action == QI_Actions.UPDATE.value:
+                        if not os.path.exists(itemInputFolder): #exit iteration if the file does not exist
+                            self.queue.remove(item)#remove the item from the list/queue
+                            continue
+                        if item.itemType == QI_ItemType.FILE.value:
+                            pass
+                        elif item.itemType == QI_ItemType.DIR.value:
+                            pass
                         await self.attemptExtraction(itemInputFolder)
-                    elif item.itemType == QI_ItemType.DIR.value:
-                        pass
-                    await self._makeSymLink(self.inputDir,self.outputDir,item.itemName,self.directoryDepth)
-                elif item.action == QI_Actions.DELETE.value:
-                    #empty all symbolic links.
-                    #if I add a extract archive function handle deleting the archive files.
-                    await self._checkDeadSymlink(itemOutputFolder)
-                    if not os.path.islink(itemOutputFolder) and os.path.exists(itemOutputFolder): #remove the directory if it is not a link.
-                        os.removedirs(itemOutputFolder)
-                self.queue.remove(item)#remove the item from the list/queue
+                        print("COMPLETED EXTRACTION")
+                        await self._makeSymLink(self.inputDir,self.outputDir,item.itemName,self.directoryDepth)
+                    elif item.action == QI_Actions.DELETE.value:
+                        #empty all symbolic links.
+                        #if I add a extract archive function handle deleting the archive files.
+                        await self.extractDeletion(itemInputFolder)
+                        await self._checkDeadSymlink(itemOutputFolder)
+                        if not os.path.islink(itemOutputFolder) and os.path.exists(itemOutputFolder): #remove the directory if it is not a link.
+                            os.removedirs(itemOutputFolder)
+                    
+            except Exception as e:
+                print("ERRPROMG " + str(e))
+                pass
+            print("Next")
+            self.queue.remove(item)#remove the item from the list/queue
+        print("DONE")
+
     async def syncingCheck(self,folderID):
         result = await self.rest.getStatus(folderID)
         lastSync = await self.createDateTime(result["stateChanged"]) 
