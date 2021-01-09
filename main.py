@@ -32,17 +32,17 @@ class main:
         self.processingQueueTask = loop.create_task(self._processQueue("NOT MEEE")) #holds the last processing queue task.
         #may wanna listen to onItemStarted to remove items from the queue that are being updated again to prevent issues.
 
+    #add items to queue with the specified date to be processed when the folder is finished syncing
     async def addItemToQueue(self,data):
         noError = data.data.error == None
-        
-        if await self.isFolder(data.data.folder) and noError:
+        if await self.isFolder(data.data.folder) and noError: #check if we are looking at the correct folderID and that no errors have occured
             print(data)
             itemName = data.data.item
             itemType = data.data.type
             folderID = data.data.folder
             action = data.data.action
             item = QueueItem(itemName,itemType,folderID,action)
-            self.queue.append(item)
+            self.queue.append(item) #add the new QueueItem Object to the list
 
     #the purpose of this function is to handle all the cleaning that may be required due to strange shutdowns
     async def startingCleaning(self):
@@ -56,7 +56,7 @@ class main:
         noNeededFiles = data.data.summary["needFiles"]==0
         noNeededDirs = data.data.summary["needDirectories"]==0
         noNeededBytes = data.data.summary["needBytes"]==0
-        print("FIRING QueueSize "+ str(len(self.queue)))
+        print("Starting QueueSize "+ str(len(self.queue)))
         if (await self.isFolder(data.data.folder)):
             print(str(data))
         print(await self.isFolder(data.data.folder))
@@ -66,31 +66,21 @@ class main:
         print("noNeededBytes {0}".format(noNeededBytes))
         
         if await self.isFolder(data.data.folder) and isIdle and noNeededFiles and noNeededFiles and noNeededDirs and noNeededBytes:
-            #print(str(data))
-            
-            print("Counter: " + str(self.counter))
             await asyncio.sleep(5)
             while not self.processingQueueTask.done():
                 await asyncio.sleep(4) #this is not a mission critical task and should be done slowly.
-                print("LOOPPPPINGGG")
-            self.counter += 1
-            print("Counter: " + str(self.counter))
             while len(self.queue) > 0:
                 self.processingQueueTask = asyncio.create_task(self._processQueue(data.data.folder))
                 await self.processingQueueTask
-                print("Queue Size to 0")
+                print("Queue Size until 0")
                 print("Current QueueSize" + str(len(self.queue)))
-            self.counter -= 1
-            print("Counter: " + str(self.counter))
-            # self._symLinkFolder(self.inputDir,self.outputDir)
-            # self._checkDeadSymlink(self.outputDir)
-        print("QueueSize "+ str(len(self.queue)))
 
+    #manage the process queue until its empty
     async def _processQueue(self,folderID):
         for item in self.queue:
-            
             try:
                 if item.folderID == folderID:
+                    #check between each iteration to determine if the process queue should halt due to syncing
                     await self.syncingCheck(item.folderID)
                     #determine if its a folder or path.
                         # if folder then create a symlink to it and unrar any files in that directory.
@@ -100,28 +90,23 @@ class main:
                     itemOutputFolder = self.outputDir + os.sep + item.itemName
                     itemInputFolder = self.inputDir + os.sep + item.itemName
                     print("Processing " + item.itemName)
-                    
                     if item.action == QI_Actions.UPDATE.value:
                         if not os.path.exists(itemInputFolder): #exit iteration if the file does not exist
                             self.queue.remove(item)#remove the item from the list/queue
                             continue
-                        if item.itemType == QI_ItemType.FILE.value:
-                            pass
-                        elif item.itemType == QI_ItemType.DIR.value:
-                            pass
+                        #attempt to extract any files in the input directory before creating the symlink
                         await self.attemptExtraction(itemInputFolder)
-                        print("COMPLETED EXTRACTION")
+                        #create the symbolic link
                         await self._makeSymLink(self.inputDir,self.outputDir,item.itemName,self.directoryDepth)
                     elif item.action == QI_Actions.DELETE.value:
-                        #empty all symbolic links.
-                        #if I add a extract archive function handle deleting the archive files.
+                        #Delete any extracted items so the folder can be properly deleted
                         await self.extractDeletion(itemInputFolder)
+                        #unlink the dead symlink to declutter the output folder
                         await self._checkDeadSymlink(itemOutputFolder)
                         if not os.path.islink(itemOutputFolder) and os.path.exists(itemOutputFolder): #remove the directory if it is not a link.
-                            os.removedirs(itemOutputFolder)
-                    
+                            os.removedirs(itemOutputFolder) 
             except Exception as e:
-                print("ERRPROMG " + str(e))
+                print("Error " + str(e))
                 pass
             print("Next")
             self.queue.remove(item)#remove the item from the list/queue
@@ -133,9 +118,7 @@ class main:
         currentTime = datetime.now()
         delta = (currentTime - lastSync).seconds
         if delta < 60: 
-            print("LOOPY")
             attempts = 0
-            print("RESETTING")
             while attempts < 3:
                 await asyncio.sleep(15)
                 result = await self.rest.getStatus(folderID)
@@ -145,10 +128,11 @@ class main:
                     attempts += 1
                     print("IDLE")
                 else:
-                    print("FAIL")
+                    print("Retrying for idles.")
                     attempts = 0
         print("Idle Long Enough")
 
+    #take the time syncthing gives and return a datetime object
     async def createDateTime(self,time):
         date = time.split("T")[0].split("-") #represented by Year Month Day
         time = time.split("T")[1].split(".")[0].split(":") #represented by H M S
@@ -177,27 +161,25 @@ class main:
             extractable = await archiveHandler.archiveHandler.isSupportedArchive(item)
             try:
                 if extractable and not alreadyDone:#if its a supported archive attempt to unrar
-                    print("LISTING ARCHIVE")
-                    print(item)
                     archiveContents = await archiveHandler.archiveHandler.listArchive(extractionDir+os.sep+item)
-                    print("EXTRACTING")
                     await archiveHandler.archiveHandler.extractArchive(item,extractionDir)
                     if len(archiveContents) > 0:
+                        print("Extracted " + item)
                         await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
                         break #leave loop once we found the good archive to extract
             except:
                 pass
-
+    
+    #delete files that were extracted cleaning up the extraction
     async def extractDeletion(self,extractItem):
         extractionDir = await self._findFileDirectory(extractItem)
-        if os.path.exists(extractionDir):
-            print("EXTRACTABLE")
-            archiveContents = await self.fileLoad(extractionDir+os.sep+"filesExtracted.json")
+        if os.path.exists(extractionDir): #if this folder still exists try to delete any items inside and the folder itself.
+            archiveContents = await self.fileLoad(extractionDir+os.sep+"filesExtracted.json") #load the file containing the items extracted
             for item in archiveContents:
                 print("DELETING " + item)
                 os.remove(extractionDir+os.sep+item)
             os.remove(extractionDir+os.sep+"filesExtracted.json")
-            os.removedirs(extractionDir)#remove the trailing directory that syncthing didnt delete due to files e
+            os.removedirs(extractionDir)#remove the trailing directory that syncthing didnt delete due to files in that directory
 
     async def fileLoad(self,fileName):#loads files
         with open(fileName, 'r') as handle:#loads the json file
@@ -205,7 +187,7 @@ class main:
         return config
 
 
-    async def fileSave(self,fileName,config):
+    async def fileSave(self,fileName,config):#saves files in jason formate
         print("Saving")
         f = open(fileName, 'w') #opens the file your saving to with write permissions
         f.write(json.dumps(config,sort_keys=True, indent=4 ) + "\n") #writes the string to a file
@@ -227,10 +209,9 @@ class main:
         except FileExistsError as e:
             print("FILE ALREADY EXIST {0}".format(newDst))
 
-
+    #check if it is the folderID we are supposed to look at
     async def isFolder(self,folderID):
         return folderID == self.folderID
-
 
     #I should rewrite this cleaner.
     async def _symLinkFolder(self,pathToWalk, destinationPath):
