@@ -42,7 +42,7 @@ class Events(BaseAPI):
                 eventType = event["type"]
                 data = Object(event["data"])
                 data = Object({"time": event["time"], "data": data})
-
+                
                 #fire any events that occured
                 if eventType == "ConfigSaved":
                     self.Events.onConfigSaved(data)
