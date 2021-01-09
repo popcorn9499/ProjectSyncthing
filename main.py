@@ -24,6 +24,7 @@ class main:
         self.directoryDepth = config["directoryDepth"] #the depth in a directory structure to create a symbolic link in.
         self.base = BaseAPI(config["api_key"],host=config["host"],port=config["port"])
         self.events = Events(config["api_key"],host=config["host"],port=config["port"])
+        self.rest = Rest(config["api_key"],host=config["host"],port=config["port"])
         self.events.Events.onFolderSummary += self.main
         self.events.Events.onItemFinished += self.addItemToQueue
         self.queue = [] #store a queue of file changes. This should be type list<QueueItem>
