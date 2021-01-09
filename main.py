@@ -88,9 +88,11 @@ class main:
         return directory
 
     async def attemptExtraction(self,extractItem):
-        if await archiveHandler.archiveHandler.isSupportedArchive(extractItem):#if its a supported archive attempt to unrar
+        extractionDir = await self._findFileDirectory(extractItem)
+        alreadyDone = os.path.exists(extractionDir+os.sep+"filesExtracted.json")
+        extractable = await archiveHandler.archiveHandler.isSupportedArchive(extractItem)
+        if extractable and not alreadyDone:#if its a supported archive attempt to unrar
             archiveContents = await archiveHandler.archiveHandler.listArchive(extractItem)
-            extractionDir = await self._findFileDirectory(extractItem)
             await archiveHandler.archiveHandler.extractArchive(extractItem,extractionDir)
             await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
 
