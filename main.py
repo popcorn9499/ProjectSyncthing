@@ -80,8 +80,15 @@ class main:
                     await self._checkDeadSymlink(itemOutputFolder)
                     if not os.path.islink(itemOutputFolder) and os.path.exists(itemOutputFolder): #remove the directory if it is not a link.
                         os.removedirs(itemOutputFolder)
-                
                 self.queue.remove(item)#remove the item from the list/queue
+
+    async def _findFileDirectory(self,item):
+        directory = item
+        if (os.path.isfile(item)):
+            lastSlash = item.rfind(os.sep)
+            directory = item[:lastSlash]
+        return directory
+
     async def attemptExtraction(self,extractItem):
         if await archiveHandler.archiveHandler.isSupportedArchive(extractItem):#if its a supported archive attempt to unrar
             archiveContents = await archiveHandler.archiveHandler.listArchive(extractItem)
