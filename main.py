@@ -100,6 +100,16 @@ class main:
             await archiveHandler.archiveHandler.extractArchive(extractItem,extractionDir)
             await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
 
+    async def extractDeletion(self,extractItem):
+        extractionDir = await self._findFileDirectory(extractItem)
+        if os.path.exists(extractionDir):
+            print("EXTRACTABLE")
+            archiveContents = await self.fileLoad(extractionDir+os.sep+"filesExtracted.json")
+            for item in archiveContents:
+                os.remove(extractionDir+os.sep+item)
+            os.remove(extractionDir+os.sep+"filesExtracted.json")
+            os.removedirs(extractionDir)#remove the trailing directory that syncthing didnt delete due to files e
+
     async def fileLoad(self,fileName):#loads files
         with open(fileName, 'r') as handle:#loads the json file
             config = json.load(handle) 
