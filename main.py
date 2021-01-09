@@ -8,7 +8,6 @@ import fileIO
 from QueueItem import QueueItem,QI_Actions,QI_ItemType
 import archiveHandler
 
-
 class main:
     def __init__(self):
         config = {"host": "localhost", "port": 8384, "api_key": "InsertKeyHere", "inputDir": "/path/to/Torrents/", "outputDir": "/path/to/TorrentsLinks/","directoryDepth": 2, "syncthingMonitorFolderID": "someID" }
@@ -58,7 +57,6 @@ class main:
             # self._checkDeadSymlink(self.outputDir)
 
     async def _processQueue(self,folderID):
-
         for item in self.queue:
             if item.folderID == folderID:
                 #determine if its a folder or path.
