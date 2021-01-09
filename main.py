@@ -30,6 +30,7 @@ class main:
         self.queue = [] #store a queue of file changes. This should be type list<QueueItem>
         loop = asyncio.get_event_loop()
         self.processingQueueTask = loop.create_task(self._processQueue("NOT MEEE")) #holds the last processing queue task.
+        loop.create_task(_self.startingCleaning())
         #may wanna listen to onItemStarted to remove items from the queue that are being updated again to prevent issues.
 
     #add items to queue with the specified date to be processed when the folder is finished syncing
@@ -45,9 +46,10 @@ class main:
             self.queue.append(item) #add the new QueueItem Object to the list
 
     #the purpose of this function is to handle all the cleaning that may be required due to strange shutdowns
-    async def startingCleaning(self):
-        pass
+    async def _startingCleaning(self):
         #clean any dead links
+        await self._checkDeadSymlinks(self.outputDir)
+        
         #create any links and extracted files that may be required. 
         #walk through folder
 
