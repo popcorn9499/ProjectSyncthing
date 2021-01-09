@@ -158,8 +158,10 @@ class main:
     async def _findFileDirectory(self,item):
         directory = item
         if (os.path.isfile(item)):
+            print("Find File Directory LOOKING " + item)
             lastSlash = item.rfind(os.sep)
             directory = item[:lastSlash]
+        print("Find File Directory Result " + directory)
         return directory
 
     async def attemptExtraction(self,extractItem):
@@ -185,6 +187,7 @@ class main:
             print("EXTRACTABLE")
             archiveContents = await self.fileLoad(extractionDir+os.sep+"filesExtracted.json")
             for item in archiveContents:
+                print("DELETING " + item)
                 os.remove(extractionDir+os.sep+item)
             os.remove(extractionDir+os.sep+"filesExtracted.json")
             os.removedirs(extractionDir)#remove the trailing directory that syncthing didnt delete due to files e
