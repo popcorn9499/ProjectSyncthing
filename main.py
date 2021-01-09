@@ -6,6 +6,7 @@ from Events import Events
 import os
 import fileIO
 from QueueItem import QueueItem,QI_Actions,QI_ItemType
+import archiveHandler
 
 
 class main:
@@ -68,10 +69,10 @@ class main:
                 itemOutputFolder = self.outputDir + os.sep + item.itemName
                 itemInputFolder = self.inputDir + os.sep + item.itemName
                 if item.action == QI_Actions.UPDATE.value:
-                    if item.itemType == QI_ItemType.FILE.value:
-                        pass
-                    elif item.itemType == QI_ItemType.DIR.value:
-                        pass
+                    # if item.itemType == QI_ItemType.FILE.value:
+                    #     await self.attemptExtraction(itemInputFolder)
+                    # elif item.itemType == QI_ItemType.DIR.value:
+                    #     pass
                     await self._makeSymLink(self.inputDir,self.outputDir,item.itemName,self.directoryDepth)
                 elif item.action == QI_Actions.DELETE.value:
                     #empty all symbolic links.
@@ -79,6 +80,12 @@ class main:
                     await self._checkDeadSymlink(itemOutputFolder)
                 
                 self.queue.remove(item)#remove the item from the list/queue
+    async def attemptExtraction(self,extractItem):
+        if await archiveHandler.archiveHandler.isSupportedArchive(extractItem):#if its a supported archive attempt to unrar
+            archiveContents = await archiveHandler.archiveHandler.listArchive(extractItem)
+            extractionDir = await self._findFileDirectory(extractItem)
+            await archiveHandler.archiveHandler.extractArchive(extractItem,extractionDir)
+            await self.fileSave(extractionDir+os.sep+"filesExtracted.json", archiveContents)
 
     async def _makeSymLink(self,src,dst,item,depth):
         items = item.split(os.sep)
