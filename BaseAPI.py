@@ -13,11 +13,9 @@ class BaseAPI:
     async def post(self,endpoint,params=[]):
         async with aiohttp.ClientSession() as session:
             async with session.post(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
-                print(resp.status)
                 return await resp.json()
 
     async def get(self,endpoint,params=[]):
         async with aiohttp.ClientSession() as session:
             async with session.get(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
-                print(resp.status)
                 return await resp.json()
