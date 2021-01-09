@@ -147,7 +147,7 @@ class main:
                 else:
                     print("FAIL")
                     attempts = 0
-        print("DONE")
+        print("Idle Long Enough")
 
     async def createDateTime(self,time):
         date = time.split("T")[0].split("-") #represented by Year Month Day
