@@ -78,7 +78,7 @@ class main:
                     #empty all symbolic links.
                     #if I add a extract archive function handle deleting the archive files.
                     await self._checkDeadSymlink(itemOutputFolder)
-                    if not os.path.islink(itemOutputFolder): #remove the directory if it is not a link.
+                    if not os.path.islink(itemOutputFolder) and os.path.exists(itemOutputFolder): #remove the directory if it is not a link.
                         os.removedirs(itemOutputFolder)
                 
                 self.queue.remove(item)#remove the item from the list/queue
