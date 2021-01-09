@@ -1,6 +1,7 @@
 from BaseAPI import BaseAPI
 import asyncio
 from Object import Object
+import aiohttp
 
 class Rest(BaseAPI):
     
@@ -18,5 +19,8 @@ class Rest(BaseAPI):
     async def revertFolder(self,folderID):
         endpoint="/rest/db/revert"
         params = {"folder": folderID}
-        data = await self.post(endpoint, params=params)
-        print(data)
+        try:
+            data = await self.post(endpoint, params=params)
+            print(data)
+        except aiohttp.client_exceptions.ContentTypeError: #since this call does not have json attached to it.
+            pass
