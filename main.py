@@ -33,8 +33,9 @@ class main:
 
     async def addItemToQueue(self,data):
         noError = data.data.error == None
-        print(data)
+        
         if await self.isFolder(data.data.folder) and noError:
+            print(data)
             itemName = data.data.item
             itemType = data.data.type
             folderID = data.data.folder
