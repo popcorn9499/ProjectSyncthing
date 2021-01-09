@@ -66,6 +66,8 @@ class main:
                         #if its a file in the base directory then symlink the file.
                 itemOutputFolder = self.outputDir + os.sep + item.itemName
                 itemInputFolder = self.inputDir + os.sep + item.itemName
+                if not os.path.exists(itemInputFolder): #exit iteration if the file does not exist
+                    continue
                 if item.action == QI_Actions.UPDATE.value:
                     # if item.itemType == QI_ItemType.FILE.value:
                     #     await self.attemptExtraction(itemInputFolder)
