@@ -83,6 +83,17 @@ class main:
                     if not os.path.islink(itemOutputFolder) and os.path.exists(itemOutputFolder): #remove the directory if it is not a link.
                         os.removedirs(itemOutputFolder)
                 self.queue.remove(item)#remove the item from the list/queue
+    async def createDateTime(self,time):
+        date = time.split("T")[0].split("-") #represented by Year Month Day
+        time = time.split("T")[1].split(".")[0].split(":") #represented by H M S
+        year = int(date[0])
+        month = int(date[1])
+        day = int(date[2])
+        hour = int(time[0])
+        minute = int(time[1])
+        second = int(time[2])
+        date= datetime(year,month,day,hour=hour,minute=minute,second=second)
+        return date
 
     async def _findFileDirectory(self,item):
         directory = item
