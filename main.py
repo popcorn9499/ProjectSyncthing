@@ -123,8 +123,6 @@ class main:
             while attempts < 3:
                 await asyncio.sleep(15)
                 result = await self.rest.getStatus(folderID)
-                print(result["state"])
-                print(attempts)
                 if result["state"] == "idle":
                     attempts += 1
                     print("IDLE")
