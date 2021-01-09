@@ -87,6 +87,28 @@ class main:
                     if not os.path.islink(itemOutputFolder) and os.path.exists(itemOutputFolder): #remove the directory if it is not a link.
                         os.removedirs(itemOutputFolder)
                 self.queue.remove(item)#remove the item from the list/queue
+    async def syncingCheck(self,folderID):
+        result = await self.rest.getStatus(folderID)
+        lastSync = await self.createDateTime(result["stateChanged"]) 
+        currentTime = datetime.now()
+        delta = (currentTime - lastSync).seconds
+        if delta < 60 and result["state"] == "idle": 
+            print("LOOPY")
+            attempts = 0
+            print("RESETTING")
+            while attempts < 3:
+                await asyncio.sleep(15)
+                result = await self.rest.getStatus(folderID)
+                print(result["state"])
+                print(attempts)
+                if result["state"] == "idle":
+                    attempts += 1
+                    print("IDLE")
+                else:
+                    print("FAIL")
+                    attempts = 0
+        print("DONE")
+
     async def createDateTime(self,time):
         date = time.split("T")[0].split("-") #represented by Year Month Day
         time = time.split("T")[1].split(".")[0].split(":") #represented by H M S
