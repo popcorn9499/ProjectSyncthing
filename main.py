@@ -126,7 +126,7 @@ class main:
         lastSync = await self.createDateTime(result["stateChanged"]) 
         currentTime = datetime.now()
         delta = (currentTime - lastSync).seconds
-        if delta < 60 and result["state"] == "idle": 
+        if delta < 60 and not result["state"] == "idle": 
             print("LOOPY")
             attempts = 0
             print("RESETTING")
