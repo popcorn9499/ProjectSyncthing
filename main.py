@@ -83,12 +83,16 @@ class main:
     async def _makeSymLink(self,src,dst,item,depth):
         items = item.split(os.sep)
         items = items[0:depth]
+        try:
+            os.makedirs(dst+os.sep+(os.sep).join(items[:depth-1])) #make the directories leading up to our symbolic link
+        except:
+            pass
         newItem = (os.sep).join(items)
         newSrc = src + newItem
         newDst = dst + newItem
         try:
             print("dst: {0}, src: {1}".format(newDst,newSrc))
-            #os.symlink(newSrc,newDst)
+            os.symlink(newSrc,newDst)
         except FileExistsError as e:
             print("FILE ALREADY EXIST {0}".format(newDst))
 
