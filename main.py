@@ -69,13 +69,11 @@ class main:
                 for directory in dirs:
                     src = root + os.sep + directory
                     dst = src.replace(self.inputDir,self.outputDir)
-                    item = directory
                     await self.attemptExtraction(src)
                     await self._makeSymLink(src,dst)
                 for file in files:
                     src = root + os.sep + file
                     dst = src.replace(self.inputDir,self.outputDir)
-                    item = file
                     await self._makeSymLink(src,dst)
         print("FINISHED STARTUP")
         print("QUEUE SIZE " + str(len(self.queue)))
@@ -91,6 +89,7 @@ class main:
         noNeededDirs = data.data.summary["needDirectories"]==0
         noNeededBytes = data.data.summary["needBytes"]==0
         print("Starting QueueSize "+ str(len(self.queue)))
+        # debugging to help determine why stuff did not function correctly
         if (await self.isFolder(data.data.folder)):
             print(str(data))
         print(await self.isFolder(data.data.folder))
@@ -98,8 +97,10 @@ class main:
         print("noNeededFiles {0}".format(noNeededFiles))
         print("noNeededDirs {0}".format(noNeededDirs))
         print("noNeededBytes {0}".format(noNeededBytes))
+        #determines if this foldersummary event was useful and whether to continue
         if await self.isFolder(data.data.folder) and isIdle and noNeededFiles and noNeededFiles and noNeededDirs and noNeededBytes:
             await asyncio.sleep(5)
+            #wait for the previous process queue task to be completed before firing another one.
             while not self.processingQueueTask.done():
                 await asyncio.sleep(4) #this is not a mission critical task and should be done slowly.
             while len(self.queue) > 0:
@@ -227,9 +228,7 @@ class main:
     #create a symlink to the output directory from the input directory
     async def _makeSymLinkProcessing(self,src,dst,item,depth):
         items = item.split(os.sep)
-        
         items = items[0:depth+1]
-        
         newItem = (os.sep).join(items)
         print("items {0}".format(items))
         newSrc = src + newItem
@@ -237,6 +236,7 @@ class main:
         await self._makeSymLink(newSrc,newDst)
 
     async def _makeSymLink(self,src,dst):
+        #attempts to make any missing directories if  at all possible. failure should only occur if the directory already exists
         try:
             items = dst.split(os.sep)
             items = items[:len(items)-1]
@@ -245,10 +245,12 @@ class main:
             os.makedirs(item) #make the directories leading up to our symbolic link
         except:
             pass
-
         try: #create the sym link
             print("dst: {0}, src: {1}".format(src,dst))
-            #should add a check to determine if its a file or a directory. directories should be symlinked files should be hard linked
+            '''
+            # should add a check to determine if its a file or a directory. directories
+            # should be symlinked files should be hard linked
+            '''
             if os.path.isdir(src):
                 os.symlink(src,dst)
             elif os.path.isfile(src):
@@ -259,35 +261,6 @@ class main:
     #check if it is the folderID we are supposed to look at
     async def isFolder(self,folderID):
         return folderID == self.folderID
-
-    #I should rewrite this cleaner.
-    async def _symLinkFolder(self,pathToWalk, destinationPath):
-        levelDepth = len(pathToWalk.split("/")) #this splits the top dir / as ""
-        levelDepth+=1 #for the directory after this level
-        for subdir, dirs,files in os.walk(pathToWalk):
-            try:
-                #print(subdir)
-                if (len(subdir.split("/")) == levelDepth):
-                    #print(subdir + ": good")
-                    baseDir = os.path.basename(subdir)
-                    if (baseDir == ""):
-                        #print("wrong")
-                        splitArgs = subdir.split("/")
-                        baseDir = splitArgs[len(splitArgs)-2]
-                    os.symlink(subdir,self.outputDir+"/"+baseDir)
-                if (subdir == self.inputDir):
-                    print(files)
-                    for file in files:
-                        try:
-                            print(file + ": good")
-                            os.link(subdir+"/"+file,self.outputDir+"/"+file)
-                        except:
-                            pass
-
-            except FileExistsError as e:
-                print(e)
-                print("FILE ALREADY EXIST {0}".format(subdir))
-                pass
 
     async def _checkDeadSymlinks(self,path):
         for subdir,dirs,files in os.walk(path):
