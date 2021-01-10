@@ -244,10 +244,11 @@ class main:
                 pass
 
     async def _checkDeadSymlinks(self,path):
-        #os.path.islink(filename) and not os.path.exists(filename)
         for subdir,dirs,files in os.walk(path):
+            print(files)
+            print(subdir)
             for file in files:
-                self._checkDeadSymLink(subdir+ "/" +file)
+                await self._checkDeadSymlink(subdir+ "/" +file)
                 if len(os.listdir(subdir)) == 0: #remove the directory if its empty.
                     os.removedirs(subdir)
 
