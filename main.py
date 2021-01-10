@@ -82,7 +82,7 @@ class main:
 
 
     async def main(self, data):
-        isIdle = data.data.summary["state"] == "idle"
+        isIdle = data.data.summary["state"] == "idle" or data.data.summary["state"] == "scanning" or data.data.summary["state"] == "scan-waiting"
         noNeededFiles = data.data.summary["needFiles"]==0
         noNeededDirs = data.data.summary["needDirectories"]==0
         noNeededBytes = data.data.summary["needBytes"]==0
