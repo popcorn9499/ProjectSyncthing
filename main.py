@@ -57,7 +57,6 @@ class main:
         await self._checkDeadSymlinks(self.outputDir)
         await asyncio.sleep(10)
         #create any links and extracted files that may be required.
-        
         print("Relinking and extracting")
         #walk through folder
         maxDepth = self.inputDir.count(os.sep) - 1 + self.directoryDepth
