@@ -48,10 +48,39 @@ class main:
     #the purpose of this function is to handle all the cleaning that may be required due to strange shutdowns
     async def _startingCleaning(self):
         #clean any dead links
+        await self.rest.revertFolder(self.folderID)
+        print("CLEANING")
+        await asyncio.sleep(10)
+        await self.syncingCheck(self.folderID)
+        print("REMOVING DEAD LINKS")
+        #potentially also remove links that just dont point to the correct directory
         await self._checkDeadSymlinks(self.outputDir)
+        await asyncio.sleep(10)
+        #create any links and extracted files that may be required.
         
-        #create any links and extracted files that may be required. 
+        print("Relinking and extracting")
         #walk through folder
+        maxDepth = self.inputDir.count(os.sep) - 1 + self.directoryDepth
+        for root,dirs,files in os.walk(self.inputDir):
+            if root.endswith(os.sep):
+                root =  root[:len(root)-1]
+            curDepth = root.count(os.sep) #determine the current depth we are looking at.
+            if curDepth == maxDepth:
+                for directory in dirs:
+                    src = root + os.sep + directory
+                    dst = src.replace(self.inputDir,self.outputDir)
+                    item = directory
+                    await self.attemptExtraction(src)
+                    await self._makeSymLink(src,dst)
+                for file in files:
+                    src = root + os.sep + file
+                    dst = src.replace(self.inputDir,self.outputDir)
+                    item = file
+                    await self._makeSymLink(src,dst)
+        print("FINISHED STARTUP")
+        print("QUEUE SIZE " + str(len(self.queue)))
+
+
 
     async def main(self, data):
         isIdle = data.data.summary["state"] == "idle"
