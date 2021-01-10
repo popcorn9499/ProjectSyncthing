@@ -3,12 +3,9 @@ import asyncio
 from Object import Object
 import aiohttp
 
-class Rest(BaseAPI):
-    
+class Rest(BaseAPI):    
     def __init__(self,apiKey,last_seen_id=None,filters=None,limit=None, *args, **kwargs):
         super().__init__(apiKey, *args, **kwargs)
-
-            
     
     async def getStatus(self,folderID):
         endpoint="/rest/db/status"

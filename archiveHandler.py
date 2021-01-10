@@ -32,7 +32,3 @@ class archiveHandler:
     async def extractArchive(archive,extractLocation):
         handler = await archiveHandler.determineArchiveType(archive)
         await handler.extractArchive(archive,extractLocation)
-
-#exceptions
-
-#handlers

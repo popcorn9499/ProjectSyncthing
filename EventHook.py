@@ -2,7 +2,6 @@
 import asyncio
 
 class EventHook(object):
-
     def __init__(self):
         self.handlers = []
     

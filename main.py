@@ -98,7 +98,6 @@ class main:
         print("noNeededFiles {0}".format(noNeededFiles))
         print("noNeededDirs {0}".format(noNeededDirs))
         print("noNeededBytes {0}".format(noNeededBytes))
-        
         if await self.isFolder(data.data.folder) and isIdle and noNeededFiles and noNeededFiles and noNeededDirs and noNeededBytes:
             await asyncio.sleep(5)
             while not self.processingQueueTask.done():
