@@ -220,7 +220,11 @@ class main:
         f.write(json.dumps(config,sort_keys=True, indent=4 ) + "\n") #writes the string to a file
         f.close() #closes the file io
 
-    #create a symlink to the output directory from the input directory
+    #I want to get rid of this however I am too lazy to touch it so this will likely stand forever..
+    # the purpose was to try to kepe within a certain depth in the file system for creating the symlinks. 
+    # a potentially easier solution may of been to make every file a link.. however I started it the previous way and 
+    # we shall end this way too I guess
+    # Live by the sword die by the sword
     async def _makeSymLinkProcessing(self,src,dst,item,depth):
         items = item.split(os.sep)
         items = items[0:depth+1]
@@ -230,6 +234,7 @@ class main:
         newDst = dst + newItem
         await self._makeSymLink(newSrc,newDst)
 
+    #create a symlink to the output directory from the input directory
     async def _makeSymLink(self,src,dst):
         #attempts to make any missing directories if  at all possible. failure should only occur if the directory already exists
         try:
