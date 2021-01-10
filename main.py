@@ -99,7 +99,7 @@ class main:
                         #attempt to extract any files in the input directory before creating the symlink
                         await self.attemptExtraction(itemInputFolder)
                         #create the symbolic link
-                        await self._makeSymLink(self.inputDir,self.outputDir,item.itemName,self.directoryDepth)
+                        await self._makeSymLinkProcessing(self.inputDir,self.outputDir,item.itemName,self.directoryDepth)
                     elif item.action == QI_Actions.DELETE.value:
                         #Delete any extracted items so the folder can be properly deleted
                         await self.extractDeletion(itemInputFolder)
