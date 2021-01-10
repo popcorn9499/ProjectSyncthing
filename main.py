@@ -224,9 +224,11 @@ class main:
     #create a symlink to the output directory from the input directory
     async def _makeSymLinkProcessing(self,src,dst,item,depth):
         items = item.split(os.sep)
-        items = items[0:depth-1]
+        
+        items = items[0:depth+1]
         
         newItem = (os.sep).join(items)
+        print("items {0}".format(items))
         newSrc = src + newItem
         newDst = dst + newItem
         await self._makeSymLink(newSrc,newDst)
