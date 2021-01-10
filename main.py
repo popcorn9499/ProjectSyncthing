@@ -148,12 +148,14 @@ class main:
     #check to see if we have idled for a long enough period of time
     async def syncingCheck(self,folderID):
         delta=0
+        isIdle = False
         print("Checking Idle status")
-        while delta < 60:
+        while delta < 60 and isIdle:
             print("Idled for: {0} seconds".format(delta))
             result = await self.rest.getStatus(folderID)
             lastSync = await self.createDateTime(result["stateChanged"]) 
             delta = (datetime.now() - lastSync).seconds
+            isIdle = result["state"] == "idle"
             await asyncio.sleep(15)
         print("Idled Long Enough")
 
