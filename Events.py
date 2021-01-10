@@ -4,7 +4,6 @@ import asyncio
 from Object import Object
 
 class Events(BaseAPI):
-    
     def __init__(self,apiKey,last_seen_id=None,filters=None,limit=None, *args, **kwargs):
         super().__init__(apiKey, *args, **kwargs)
         self._last_seen_id = last_seen_id or 0
@@ -38,11 +37,11 @@ class Events(BaseAPI):
             params = {"timeout":60, "since": self._last_seen_id}
             eventData = await self.get(self.endpoint, params=params)
             for event in eventData:
-                self._last_seen_id = event["id"]
-                eventType = event["type"]
+                self._last_seen_id = event["id"] #keep track of the last ID we have seen
+                eventType = event["type"] #store the event type for easier typing
+                #store the event data into a object to make it easier to send as events
                 data = Object(event["data"])
                 data = Object({"time": event["time"], "data": data})
-                
                 #fire any events that occured
                 if eventType == "ConfigSaved":
                     self.Events.onConfigSaved(data)
@@ -95,7 +94,6 @@ class Events(BaseAPI):
                 elif eventType == "StateChanged":
                     self.Events.onStateChanged(data)
                     continue
-
 
 class _Events(object):
     def __init__(self):
