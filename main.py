@@ -248,6 +248,8 @@ class main:
         for subdir,dirs,files in os.walk(path):
             for file in files:
                 self._checkDeadSymLink(subdir+ "/" +file)
+                if len(os.listdir(subdir)) == 0: #remove the directory if its empty.
+                    os.removedirs(subdir)
 
     #Remove a dead symbolic link.
     async def _checkDeadSymlink(self,path):
