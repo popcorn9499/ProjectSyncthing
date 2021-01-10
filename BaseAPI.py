@@ -9,13 +9,25 @@ class BaseAPI:
     def __init__(self,apiKey, host="localhost",port=8384):
         self._headers = {'X-API-key': apiKey}
         self._baseURL = "http://{host}:{port}{endpoint}".format(host=host,port=port,endpoint="{endpoint}")
+        self._retryTime = 60
+        self._retryMessage = "Retrying Connection Error"
 
     async def post(self,endpoint,params=[]):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
-                return await resp.json()
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
+                    return await resp.json()
+        except aiohttp.client_exceptions.ClientConnectorError:
+            print(self._retryMessage)
+            await asyncio.sleep(self._retryTime)
+            await self.post(endpoint,params=params)
 
     async def get(self,endpoint,params=[]):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
-                return await resp.json()
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
+                    return await resp.json()
+        except aiohttp.client_exceptions.ClientConnectorError:
+            print(self._retryMessage)
+            await asyncio.sleep(self._retryTime)
+            await self.get(endpoint,params=params)
