@@ -145,23 +145,17 @@ class main:
             self.queue.remove(item)#remove the item from the list/queue
         print("DONE")
 
+    #check to see if we have idled for a long enough period of time
     async def syncingCheck(self,folderID):
-        result = await self.rest.getStatus(folderID)
-        lastSync = await self.createDateTime(result["stateChanged"]) 
-        currentTime = datetime.now()
-        delta = (currentTime - lastSync).seconds
-        if delta < 60: 
-            attempts = 0
-            while attempts < 3:
-                await asyncio.sleep(15)
-                result = await self.rest.getStatus(folderID)
-                if result["state"] == "idle":
-                    attempts += 1
-                    print("IDLE")
-                else:
-                    print("Retrying for idles.")
-                    attempts = 0
-        print("Idle Long Enough")
+        delta=0
+        print("Checking Idle status")
+        while delta < 60:
+            print("Idled for: {0} seconds".format(delta))
+            result = await self.rest.getStatus(folderID)
+            lastSync = await self.createDateTime(result["stateChanged"]) 
+            delta = (datetime.now() - lastSync).seconds
+            await asyncio.sleep(15)
+        print("Idled Long Enough")
 
     #take the time syncthing gives and return a datetime object
     async def createDateTime(self,time):
