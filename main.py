@@ -214,7 +214,6 @@ class main:
             config = json.load(handle) 
         return config
 
-
     async def fileSave(self,fileName,config):#saves files in jason formate
         print("Saving")
         f = open(fileName, 'w') #opens the file your saving to with write permissions
@@ -273,10 +272,6 @@ class main:
            print("Dead Link: " + path)
            os.unlink(path)
 
-
 main1 = main()
-
 loop = asyncio.get_event_loop()
-#loop.run_until_complete(base.get("/rest/system/version"))
 loop.run_forever()
-# loop.run_until_complete(base.post("/rest/system/ping"))
