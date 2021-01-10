@@ -27,6 +27,7 @@ class main:
         self.rest = Rest(config["api_key"],host=config["host"],port=config["port"])
         self.events.Events.onFolderSummary += self.main
         self.events.Events.onItemFinished += self.addItemToQueue
+        self.events.Events.onStateChanged += self.stateChanged
         self.queue = [] #store a queue of file changes. This should be type list<QueueItem>
         loop = asyncio.get_event_loop()
         self.processingQueueTask = loop.create_task(self._startingCleaning()) #holds the last processing queue task.
@@ -79,7 +80,10 @@ class main:
         print("FINISHED STARTUP")
         print("QUEUE SIZE " + str(len(self.queue)))
 
-
+    #debugging so we can tell when the syncing state has changed
+    async def stateChanged(self,data):
+        if await self.isFolder(data.data.folder):
+            print("THE STATE HAS CHANGED {0}".format(data))
 
     async def main(self, data):
         isIdle = data.data.summary["state"] == "idle" or data.data.summary["state"] == "scanning" or data.data.summary["state"] == "scan-waiting"
