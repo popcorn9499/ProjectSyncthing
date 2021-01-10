@@ -194,21 +194,34 @@ class main:
         f.close() #closes the file io
 
     #create a symlink to the output directory from the input directory
-    async def _makeSymLink(self,src,dst,item,depth):
+    async def _makeSymLinkProcessing(self,src,dst,item,depth):
         items = item.split(os.sep)
-        items = items[0:depth]
-        try:
-            os.makedirs(dst+os.sep+(os.sep).join(items[:depth-1])) #make the directories leading up to our symbolic link
-        except:
-            pass
+        items = items[0:depth-1]
+        
         newItem = (os.sep).join(items)
         newSrc = src + newItem
         newDst = dst + newItem
+        await self._makeSymLink(newSrc,newDst)
+
+    async def _makeSymLink(self,src,dst):
+        try:
+            items = dst.split(os.sep)
+            items = items[:len(items)-1]
+            item = os.sep.join(items)
+            print(item)
+            os.makedirs(item) #make the directories leading up to our symbolic link
+        except:
+            pass
+
         try: #create the sym link
-            print("dst: {0}, src: {1}".format(newDst,newSrc))
-            os.symlink(newSrc,newDst)
+            print("dst: {0}, src: {1}".format(src,dst))
+            #should add a check to determine if its a file or a directory. directories should be symlinked files should be hard linked
+            if os.path.isdir(src):
+                os.symlink(src,dst)
+            elif os.path.isfile(src):
+                os.link(src,dst)
         except FileExistsError as e:
-            print("FILE ALREADY EXIST {0}".format(newDst))
+            print("FILE ALREADY EXIST {0}".format(src))
 
     #check if it is the folderID we are supposed to look at
     async def isFolder(self,folderID):
