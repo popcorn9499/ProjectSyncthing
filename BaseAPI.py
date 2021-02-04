@@ -17,7 +17,7 @@ class BaseAPI:
             async with aiohttp.ClientSession() as session:
                 async with session.post(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
                     return await resp.json()
-        except aiohttp.client_exceptions.ClientConnectorError:
+        except (aiohttp.client_exceptions.ClientConnectorError,aiohttp.client_exceptions.ClientPayloadError):
             print(self._retryMessage)
             await asyncio.sleep(self._retryTime)
             await self.post(endpoint,params=params)
@@ -27,7 +27,7 @@ class BaseAPI:
             async with aiohttp.ClientSession() as session:
                 async with session.get(self._baseURL.format(endpoint=endpoint),headers=self._headers,params=params) as resp:
                     return await resp.json()
-        except aiohttp.client_exceptions.ClientConnectorError:
+        except (aiohttp.client_exceptions.ClientConnectorError,aiohttp.client_exceptions.ClientPayloadError):
             print(self._retryMessage)
             await asyncio.sleep(self._retryTime)
             await self.get(endpoint,params=params)
