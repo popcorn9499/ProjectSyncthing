@@ -17,6 +17,7 @@ class main:
             fileIO.fileSave("config.json",config)
         else:
             config = fileIO.fileLoad("config.json")
+        
         self.counter = 0
         self.inputDir = config["inputDir"]
         self.outputDir = config["outputDir"]
@@ -29,7 +30,7 @@ class main:
         self.events.Events.onItemFinished += self.addItemToQueue
         self.events.Events.onStateChanged += self.stateChanged
         self.queue = [] #store a queue of file changes. This should be type list<QueueItem>
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         self.processingQueueTask = loop.create_task(self._startingCleaning()) #holds the last processing queue task.
         #may wanna listen to onItemStarted to remove items from the queue that are being updated again to prevent issues.
 
@@ -276,6 +277,14 @@ class main:
            print("Dead Link: " + path)
            os.unlink(path)
 
-main1 = main()
-loop = asyncio.get_event_loop()
-loop.run_forever()
+#this is seriously just to emulate all i used loop.run_forever for. 
+async def run():
+    main1 = main()
+    while (True):
+        await asyncio.sleep(60)
+
+asyncio.run(run())
+# loop = asyncio.get_running_loop()
+
+
+# loop.run_forever()

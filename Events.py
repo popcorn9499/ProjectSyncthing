@@ -11,7 +11,7 @@ class Events(BaseAPI):
         self._limit = limit
         self._count = 0
         self.endpoint = "/rest/events"
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self.loop.create_task(self._gatherEvents())
 
         self.Events = _Events()
