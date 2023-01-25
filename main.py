@@ -9,6 +9,7 @@ import fileIO
 from QueueItem import QueueItem,QI_Actions,QI_ItemType
 import archiveHandler
 from datetime import datetime
+import sys
 
 class main:
     def __init__(self):
@@ -282,7 +283,7 @@ async def run():
     main1 = main()
     while (True):
         await asyncio.sleep(60)
-
+print(sys.version_info)
 asyncio.run(run())
 # loop = asyncio.get_running_loop()
 
