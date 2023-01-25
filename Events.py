@@ -37,7 +37,8 @@ class Events(BaseAPI):
             params = {"timeout":60, "since": self._last_seen_id}
             eventData = await self.get(self.endpoint, params=params)
             #protect against returning a null object
-            if (eventData != None and type(eventData) == dict):
+            print(type(eventData))
+            if (eventData != None and type(eventData) == list):
                 for event in eventData:
                     self._last_seen_id = event["id"] #keep track of the last ID we have seen
                     print(event["data"])
