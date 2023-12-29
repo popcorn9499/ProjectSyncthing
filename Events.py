@@ -101,7 +101,8 @@ class Events(BaseAPI):
                             self.Events.onStateChanged(data)
                             continue
             else:
-                print("Some form of NoneType Error has occured")
+                print("Some form of NoneType Error has occurred")
+        print("We realistically should never get here! Something terrible has happened")
 
 class _Events(object):
     def __init__(self):
