@@ -38,6 +38,7 @@ class Events(BaseAPI):
             eventData = await self.get(self.endpoint, params=params)
             #protect against returning a null object
             print(type(eventData))
+            print(eventData)
             if (eventData != None and type(eventData) == list):
                 for event in eventData:
                     self._last_seen_id = event["id"] #keep track of the last ID we have seen
