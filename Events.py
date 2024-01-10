@@ -7,6 +7,7 @@ class Events(BaseAPI):
     def __init__(self,apiKey,last_seen_id=None,filters=None,limit=None, *args, **kwargs):
         super().__init__(apiKey, *args, **kwargs)
         self._last_seen_id = last_seen_id or 0
+        self._last_uptime = 0
         self._filters = filters
         self._limit = limit
         self._count = 0
@@ -32,8 +33,23 @@ class Events(BaseAPI):
         """
         return self._last_seen_id
 
+
+    async def _reconnectChecker(self):
+        reconnectEndpoint = "/rest/system/status"
+        params = {}
+        statusData = await self.get(reconnectEndpoint, params=params)
+        if "uptime" in statusData:
+            newUptime = statusData["uptime"]
+            if newUptime < self._last_uptime:
+                # consider rerunning setup program
+                print("we have had some kind of weird situation")
+                self.last_seen_id = 0
+            self._last_uptime = newUptime
+    
     async def _gatherEvents(self):
         while True:
+            #check if we have had a reconnect and need to reset anything
+            await self._reconnectChecker()
             params = {"timeout":60, "since": self._last_seen_id}
             eventData = await self.get(self.endpoint, params=params)
             #protect against returning a null object
